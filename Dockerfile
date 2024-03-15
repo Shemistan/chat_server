@@ -4,7 +4,7 @@ COPY . github.com/Shemistan/chat_server
 WORKDIR github.com/Shemistan/chat_server
 
 RUN go mod download
-RUN go build -o ./bin/user_server cmd/chat_server/main.go
+RUN go build -o ./bin/user_server cmd/grpc_server/main.go
 
 FROM alpine:latest
 
