@@ -3,8 +3,12 @@ module github.com/Shemistan/chat_server
 go 1.20
 
 require (
+	github.com/georgysavva/scany v1.2.1
+	github.com/jackc/pgconn v1.14.3
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/joho/godotenv v1.5.1
+	github.com/olezhek28/microservices_course/week_3 v0.0.0-20240111155833-b2cb6d36745b
+	github.com/pkg/errors v0.9.1
 	google.golang.org/grpc v1.61.1
 	google.golang.org/protobuf v1.32.0
 )
@@ -12,7 +16,6 @@ require (
 require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
-	github.com/jackc/pgconn v1.14.3 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.3.3 // indirect
