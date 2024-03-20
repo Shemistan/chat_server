@@ -22,7 +22,6 @@ import (
 var configPath string
 
 func init() {
-	//configPath = ".env"
 	flag.StringVar(&configPath, "config-path", ".env", "path to config file")
 }
 
