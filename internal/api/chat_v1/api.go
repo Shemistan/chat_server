@@ -1,4 +1,4 @@
-package api
+package chat_v1
 
 import (
 	"github.com/Shemistan/chat_server/internal/service"

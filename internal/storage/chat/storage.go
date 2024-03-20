@@ -58,7 +58,7 @@ func (s *storage) CreateChat(ctx context.Context, req model.Chat) (int64, error)
 }
 
 func (s *storage) createChat(ctx context.Context, chatName string) (int64, error) {
-	query := `INSERT INTO chat( name) VALUES ( $1) RETURNING(id);`
+	query := `INSERT INTO chat_v1( name) VALUES ( $1) RETURNING(id);`
 
 	var id int64
 	err := s.db.DB().QueryRowContext(ctx, db.Query{
@@ -121,7 +121,7 @@ func (s *storage) addChatUserList(ctx context.Context, chatID int64, userLogins 
 func (s *storage) AddMessage(ctx context.Context, req model.Message) error {
 	query := `
 INSERT INTO messages (chat_id, user_id, message)
-select c.id, u.id, $1 from chat as c
+select c.id, u.id, $1 from chat_v1 as c
                            left join chat_users_list cul on c.id = cul.chat_id
                            left join users u on cul.user_id = u.id
 WHERE u.login=$2 AND c.name = $3;
@@ -136,14 +136,14 @@ WHERE u.login=$2 AND c.name = $3;
 		return err
 	}
 
-	log.Printf("created message(%d) for user(%s) in to chat(%s)", id, req.UserLogin, req.ChatName)
+	log.Printf("created message(%d) for user(%s) in to chat_v1(%s)", id, req.UserLogin, req.ChatName)
 
 	return nil
 }
 
 // DeactivateChat - деактивировать чат
 func (s *storage) DeactivateChat(ctx context.Context, chatID int64) error {
-	query := `UPDATE chat SET is_active=false WHERE chat.id = $1`
+	query := `UPDATE chat_v1 SET is_active=false WHERE chat_v1.id = $1`
 
 	_, err := s.db.DB().ExecContext(ctx, db.Query{
 		Name:     "deactivate_chat",

@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/Shemistan/chat_server/internal/api"
+	chatAPI "github.com/Shemistan/chat_server/internal/api/chat_v1"
 	"github.com/Shemistan/chat_server/internal/client/db"
 	"github.com/Shemistan/chat_server/internal/client/db/pg"
 	"github.com/Shemistan/chat_server/internal/client/db/transaction"
@@ -26,7 +26,7 @@ type serviceProvider struct {
 
 	chatStorage storage.Chat
 	chatService service.Chat
-	chatAPI     *api.Chat
+	chatAPI     *chatAPI.Chat
 }
 
 func newServiceProvider() *serviceProvider {
@@ -104,9 +104,9 @@ func (s *serviceProvider) ChatService(ctx context.Context) service.Chat {
 	return s.chatService
 }
 
-func (s *serviceProvider) ChatAPI(ctx context.Context) *api.Chat {
+func (s *serviceProvider) ChatAPI(ctx context.Context) *chatAPI.Chat {
 	if s.chatAPI == nil {
-		s.chatAPI = api.New(s.ChatService(ctx))
+		s.chatAPI = chatAPI.New(s.ChatService(ctx))
 	}
 
 	return s.chatAPI
