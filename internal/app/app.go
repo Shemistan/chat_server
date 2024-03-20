@@ -5,11 +5,11 @@ import (
 	"log"
 	"net"
 
+	"github.com/Shemistan/platform_common/pkg/closer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/Shemistan/chat_server/internal/closer"
 	"github.com/Shemistan/chat_server/internal/config"
 	desc "github.com/Shemistan/chat_server/pkg/chat_api_v1"
 )
@@ -30,7 +30,6 @@ func init() {
 // NewApp - создать новый экземпляр структуры приложения
 func NewApp(ctx context.Context) (*App, error) {
 	a := &App{}
-
 	err := a.initDeps(ctx)
 	if err != nil {
 		return nil, err

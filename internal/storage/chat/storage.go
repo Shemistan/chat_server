@@ -7,7 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Shemistan/chat_server/internal/client/db"
+	"github.com/Shemistan/platform_common/pkg/db"
+
 	"github.com/Shemistan/chat_server/internal/model"
 	def "github.com/Shemistan/chat_server/internal/storage"
 )

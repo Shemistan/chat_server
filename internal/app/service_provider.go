@@ -4,11 +4,12 @@ import (
 	"context"
 	"log"
 
+	"github.com/Shemistan/platform_common/pkg/closer"
+	"github.com/Shemistan/platform_common/pkg/db"
+	"github.com/Shemistan/platform_common/pkg/db/pg"
+	"github.com/Shemistan/platform_common/pkg/db/transaction"
+
 	chatAPI "github.com/Shemistan/chat_server/internal/api/chat_v1"
-	"github.com/Shemistan/chat_server/internal/client/db"
-	"github.com/Shemistan/chat_server/internal/client/db/pg"
-	"github.com/Shemistan/chat_server/internal/client/db/transaction"
-	"github.com/Shemistan/chat_server/internal/closer"
 	"github.com/Shemistan/chat_server/internal/config"
 	"github.com/Shemistan/chat_server/internal/config/env"
 	"github.com/Shemistan/chat_server/internal/service"
