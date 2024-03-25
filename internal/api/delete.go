@@ -2,15 +2,17 @@ package api
 
 import (
 	"context"
-	"log"
-
-	"google.golang.org/protobuf/types/known/emptypb"
 
 	pb "github.com/Shemistan/chat_server/pkg/chat_api_v1"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// Delete - удаление чата из системы по его идентификатору
-func (c *Chat) Delete(_ context.Context, req *pb.DeleteRequest) (*emptypb.Empty, error) {
-	log.Printf("request: %+v", req)
+// DeleteChat - удаление чата из системы по его идентификатору
+func (c *Chat) DeleteChat(ctx context.Context, req *pb.DeleteChatRequest) (*emptypb.Empty, error) {
+	err := c.Service.DeactivateChat(ctx, req.GetChatId())
+	if err != nil {
+		return nil, err
+	}
+
 	return &emptypb.Empty{}, nil
 }

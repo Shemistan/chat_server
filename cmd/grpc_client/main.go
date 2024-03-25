@@ -9,7 +9,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	pb "github.com/Shemistan/chat_server/pkg/chat_api_v1"
-	"github.com/golang/protobuf/ptypes/timestamp"
 )
 
 const (
@@ -33,13 +32,14 @@ func main() {
 }
 
 func runClientMethods(ctx context.Context, c pb.ChatV1Client) {
-	_, err := c.Delete(ctx, &pb.DeleteRequest{Id: userID})
+	_, err := c.DeleteChat(ctx, &pb.DeleteChatRequest{ChatId: userID})
 	if err != nil {
 		log.Println("failed to delete user: ", err.Error())
 	}
 
 	resCreate, err := c.Create(ctx, &pb.CreateRequest{
-		UserNames: []string{"name_1", "name2"},
+		ChatName:   "test",
+		UserLogins: []string{"test_1", "test_2"},
 	})
 	if err != nil {
 		log.Println("failed to Create user: ", err.Error())
@@ -47,9 +47,9 @@ func runClientMethods(ctx context.Context, c pb.ChatV1Client) {
 	log.Printf("create response: %+v\n", resCreate)
 
 	_, err = c.SendMessage(ctx, &pb.SendMessageRequest{
-		From:      "test_from",
-		Text:      "test_text",
-		Timestamp: &timestamp.Timestamp{},
+		ChatName:  "test",
+		Message:   "test",
+		UserLogin: "test_1",
 	})
 	if err != nil {
 		log.Println("failed to SendMessage: ", err.Error())

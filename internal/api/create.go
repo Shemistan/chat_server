@@ -2,13 +2,16 @@ package api
 
 import (
 	"context"
-	"log"
 
+	"github.com/Shemistan/chat_server/internal/converter"
 	pb "github.com/Shemistan/chat_server/pkg/chat_api_v1"
 )
 
 // Create - создать новый чат
-func (c *Chat) Create(_ context.Context, req *pb.CreateRequest) (*pb.CreateResponse, error) {
-	log.Printf("request: %+v", req)
-	return &pb.CreateResponse{Id: 1}, nil
+func (c *Chat) Create(ctx context.Context, req *pb.CreateRequest) (*pb.CreateResponse, error) {
+	chatID, err := c.Service.CreateChat(ctx, converter.RPCCreateChatToModelChat(req))
+	if err != nil {
+		return nil, err
+	}
+	return &pb.CreateResponse{Id: chatID}, nil
 }

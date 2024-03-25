@@ -35,3 +35,15 @@ generate-chat-api:
 	--go-grpc_out=pkg/chat_api_v1 --go-grpc_opt=paths=source_relative \
 	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
 	api/chat_api_v1/chat_api.proto
+
+local-migration-status:
+	./bin/goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} status -v
+
+local-migration-up:
+	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} up -v
+
+local-migration-down:
+	./bin/goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} down -v
+
+# bin/goose -dir migrations create new_migrate sql
+# go run cmd/grpc_server/main.go --config-path=".env"

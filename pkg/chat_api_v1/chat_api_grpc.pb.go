@@ -25,7 +25,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ChatV1Client interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteChat(ctx context.Context, in *DeleteChatRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type chatV1Client struct {
@@ -54,9 +54,9 @@ func (c *chatV1Client) SendMessage(ctx context.Context, in *SendMessageRequest, 
 	return out, nil
 }
 
-func (c *chatV1Client) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *chatV1Client) DeleteChat(ctx context.Context, in *DeleteChatRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/chat_api_v1.ChatV1/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/chat_api_v1.ChatV1/DeleteChat", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (c *chatV1Client) Delete(ctx context.Context, in *DeleteRequest, opts ...gr
 type ChatV1Server interface {
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	SendMessage(context.Context, *SendMessageRequest) (*emptypb.Empty, error)
-	Delete(context.Context, *DeleteRequest) (*emptypb.Empty, error)
+	DeleteChat(context.Context, *DeleteChatRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedChatV1Server()
 }
 
@@ -83,8 +83,8 @@ func (UnimplementedChatV1Server) Create(context.Context, *CreateRequest) (*Creat
 func (UnimplementedChatV1Server) SendMessage(context.Context, *SendMessageRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
 }
-func (UnimplementedChatV1Server) Delete(context.Context, *DeleteRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+func (UnimplementedChatV1Server) DeleteChat(context.Context, *DeleteChatRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteChat not implemented")
 }
 func (UnimplementedChatV1Server) mustEmbedUnimplementedChatV1Server() {}
 
@@ -135,20 +135,20 @@ func _ChatV1_SendMessage_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ChatV1_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteRequest)
+func _ChatV1_DeleteChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteChatRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatV1Server).Delete(ctx, in)
+		return srv.(ChatV1Server).DeleteChat(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/chat_api_v1.ChatV1/Delete",
+		FullMethod: "/chat_api_v1.ChatV1/DeleteChat",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatV1Server).Delete(ctx, req.(*DeleteRequest))
+		return srv.(ChatV1Server).DeleteChat(ctx, req.(*DeleteChatRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -169,8 +169,8 @@ var ChatV1_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ChatV1_SendMessage_Handler,
 		},
 		{
-			MethodName: "Delete",
-			Handler:    _ChatV1_Delete_Handler,
+			MethodName: "DeleteChat",
+			Handler:    _ChatV1_DeleteChat_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
