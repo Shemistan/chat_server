@@ -9,5 +9,12 @@ import (
 type Chat struct {
 	pb.UnimplementedChatV1Server
 
-	Service service.Chat
+	chatService service.Chat
+}
+
+// New - новый экземпляр АПИ
+func New(chatService service.Chat) *Chat {
+	return &Chat{
+		chatService: chatService,
+	}
 }

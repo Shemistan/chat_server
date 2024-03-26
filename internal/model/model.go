@@ -9,7 +9,7 @@ type Chat struct {
 
 // Message - модель сообщения
 type Message struct {
-	ChatName  string
-	UserLogin string
-	Message   string
+	ChatName  string `db:"chat_name"`
+	UserLogin string `db:"user_login"`
+	Message   string `db:"message"`
 }
