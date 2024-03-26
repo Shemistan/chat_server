@@ -1,4 +1,4 @@
-package api
+package chat_v1
 
 import (
 	"context"
