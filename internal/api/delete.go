@@ -9,7 +9,7 @@ import (
 
 // DeleteChat - удаление чата из системы по его идентификатору
 func (c *Chat) DeleteChat(ctx context.Context, req *pb.DeleteChatRequest) (*emptypb.Empty, error) {
-	err := c.Service.DeactivateChat(ctx, req.GetChatId())
+	err := c.chatService.DeactivateChat(ctx, req.GetChatId())
 	if err != nil {
 		return nil, err
 	}
