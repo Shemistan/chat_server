@@ -1,4 +1,4 @@
-package api
+package chat_v1
 
 import (
 	"github.com/Shemistan/chat_server/internal/service"
@@ -9,5 +9,12 @@ import (
 type Chat struct {
 	pb.UnimplementedChatV1Server
 
-	Service service.Chat
+	chatService service.Chat
+}
+
+// New - новый экземпляр АПИ
+func New(chatService service.Chat) *Chat {
+	return &Chat{
+		chatService: chatService,
+	}
 }

@@ -1,60 +1,71 @@
-package user
+package chat
 
 import (
 	"context"
 	"fmt"
-
 	"log"
 	"strconv"
 	"strings"
 
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/Shemistan/platform_common/pkg/db"
 
 	"github.com/Shemistan/chat_server/internal/model"
 	def "github.com/Shemistan/chat_server/internal/storage"
 )
 
 type storage struct {
-	db *pgxpool.Pool
+	db        db.Client
+	txManager db.TxManager
 }
 
 // NewStorage - новый storage
-func NewStorage(db *pgxpool.Pool) def.Chat {
-	return &storage{db: db}
+func NewStorage(db db.Client, txManager db.TxManager) def.Chat {
+	return &storage{
+		db:        db,
+		txManager: txManager,
+	}
 }
 
 // CreateChat - создать чата
 func (s *storage) CreateChat(ctx context.Context, req model.Chat) (int64, error) {
-	tx, err := s.db.Begin(ctx)
+	var chatID int64
+
+	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+		var errTx error
+
+		chatID, errTx = s.createChat(ctx, req.Name)
+		if errTx != nil {
+			return errTx
+		}
+
+		errTx = s.addUsers(ctx, req.Users)
+		if errTx != nil {
+			return errTx
+		}
+
+		errTx = s.addChatUserList(ctx, chatID, req.Users)
+		if errTx != nil {
+			return errTx
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		return 0, err
 	}
-	defer tx.Rollback(ctx) //nolint:errcheck
 
-	chatID, err := s.createChat(ctx, tx, req.Name)
-	if err != nil {
-		return 0, err
-	}
-
-	err = s.addUsers(ctx, tx, req.Users)
-	if err != nil {
-		return 0, err
-	}
-
-	err = s.addChatUserList(ctx, tx, chatID, req.Users)
-	if err != nil {
-		return 0, err
-	}
-
-	return chatID, tx.Commit(ctx)
+	return chatID, nil
 }
 
-func (s *storage) createChat(ctx context.Context, tx pgx.Tx, chatName string) (int64, error) {
-	query := `INSERT INTO chat( name) VALUES ( $1) RETURNING(id);`
+func (s *storage) createChat(ctx context.Context, chatName string) (int64, error) {
+	query := `INSERT INTO chat_v1( name) VALUES ( $1) RETURNING(id);`
 
 	var id int64
-	err := tx.QueryRow(ctx, query, chatName).Scan(&id)
+	err := s.db.DB().QueryRowContext(ctx, db.Query{
+		Name:     "create_chat",
+		QueryRaw: query,
+	}, chatName).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
@@ -62,11 +73,14 @@ func (s *storage) createChat(ctx context.Context, tx pgx.Tx, chatName string) (i
 	return id, nil
 }
 
-func (s *storage) addUsers(ctx context.Context, tx pgx.Tx, userLogins []string) error {
+func (s *storage) addUsers(ctx context.Context, userLogins []string) error {
 	query := `INSERT INTO users(login) SELECT login FROM unnest($1::varchar[]) AS login 
               WHERE login NOT IN (SELECT login FROM users) RETURNING id;`
 
-	_, err := tx.Exec(ctx, query, userLogins)
+	_, err := s.db.DB().ExecContext(ctx, db.Query{
+		Name:     "add_user",
+		QueryRaw: query,
+	}, userLogins)
 	if err != nil {
 		return err
 	}
@@ -74,7 +88,7 @@ func (s *storage) addUsers(ctx context.Context, tx pgx.Tx, userLogins []string) 
 	return err
 }
 
-func (s *storage) addChatUserList(ctx context.Context, tx pgx.Tx, chatID int64, userLogins []string) error {
+func (s *storage) addChatUserList(ctx context.Context, chatID int64, userLogins []string) error {
 	query := `
         INSERT INTO chat_users_list (chat_id, user_id)
         SELECT $1, id
@@ -97,7 +111,10 @@ func (s *storage) addChatUserList(ctx context.Context, tx pgx.Tx, chatID int64, 
 		args[i+1] = login
 	}
 
-	_, err := tx.Exec(ctx, query, args...)
+	_, err := s.db.DB().ExecContext(ctx, db.Query{
+		Name:     "add_chat_user_list",
+		QueryRaw: query,
+	}, args...)
 	return err
 }
 
@@ -105,28 +122,34 @@ func (s *storage) addChatUserList(ctx context.Context, tx pgx.Tx, chatID int64, 
 func (s *storage) AddMessage(ctx context.Context, req model.Message) error {
 	query := `
 INSERT INTO messages (chat_id, user_id, message)
-select c.id, u.id, $1 from chat as c
+select c.id, u.id, $1 from chat_v1 as c
                            left join chat_users_list cul on c.id = cul.chat_id
                            left join users u on cul.user_id = u.id
 WHERE u.login=$2 AND c.name = $3;
 `
 
 	var id int64
-	err := s.db.QueryRow(ctx, query, req.Message, req.UserLogin, req.ChatName).Scan(&id)
+	err := s.db.DB().QueryRowContext(ctx, db.Query{
+		Name:     "add_message",
+		QueryRaw: query,
+	}, req.Message, req.UserLogin, req.ChatName).Scan(&id)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("created message(%d) for user(%s) in to chat(%s)", id, req.UserLogin, req.ChatName)
+	log.Printf("created message(%d) for user(%s) in to chat_v1(%s)", id, req.UserLogin, req.ChatName)
 
 	return nil
 }
 
 // DeactivateChat - деактивировать чат
 func (s *storage) DeactivateChat(ctx context.Context, chatID int64) error {
-	query := `UPDATE chat SET is_active=false WHERE chat.id = $1`
+	query := `UPDATE chat_v1 SET is_active=false WHERE chat_v1.id = $1`
 
-	_, err := s.db.Exec(ctx, query, chatID)
+	_, err := s.db.DB().ExecContext(ctx, db.Query{
+		Name:     "deactivate_chat",
+		QueryRaw: query,
+	}, chatID)
 	if err != nil {
 		return err
 	}

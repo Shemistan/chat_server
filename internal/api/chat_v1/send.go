@@ -1,4 +1,4 @@
-package api
+package chat_v1
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 // SendMessage - отправить сообщение на сервер
 func (c *Chat) SendMessage(ctx context.Context, req *pb.SendMessageRequest) (*emptypb.Empty, error) {
-	err := c.Service.AddMessage(ctx, converter.RPCSendMessageToModelMessage(req))
+	err := c.chatService.AddMessage(ctx, converter.RPCSendMessageToModelMessage(req))
 	if err != nil {
 		return nil, err
 	}

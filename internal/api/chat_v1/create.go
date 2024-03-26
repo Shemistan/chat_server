@@ -1,4 +1,4 @@
-package api
+package chat_v1
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 // Create - создать новый чат
 func (c *Chat) Create(ctx context.Context, req *pb.CreateRequest) (*pb.CreateResponse, error) {
-	chatID, err := c.Service.CreateChat(ctx, converter.RPCCreateChatToModelChat(req))
+	chatID, err := c.chatService.CreateChat(ctx, converter.RPCCreateChatToModelChat(req))
 	if err != nil {
 		return nil, err
 	}
